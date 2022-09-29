@@ -1,20 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 using namespace std;
 
 bool isInArr(int numb, int *arr, int arr_sz);
 void decToBin(int dec, int *bin, int size);
 int binToDec(int *bin, int size);
-void hamCo(char *srcFlName);
-void hamDe(char *srcFlName);
+void hamCo(char *srcFlName, int bit);
+void hamDe(char *srcFlName, int bit);
 
-int main()
-{
-	char srcFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/text.txt";
-	hamCo(srcFlName);
-	char srcCodedFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/ham_ham.txt";
-	hamDe(srcCodedFlName);
+int main(int argc, char *argv[])
+{	
+	if(argc < 3)
+		printf("Argument expected\n");
+	else if(strcmp(argv[1], "-c") == 0)
+	{	
+		char srcFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/text.txt";
+		hamCo(srcFlName, (int)*argv[2] - '0');
+		printf("== coded  with %d ==\n", (int)*argv[2] - '0');
+	}
+	else if(strcmp(argv[1], "-d") == 0)
+	{
+		char srcCodedFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/ham_ham.txt";
+		hamDe(srcCodedFlName, (int)*argv[2] - '0');
+		printf("== decoded  with %d ==\n", (int)*argv[2] - '0');		
+	}
+	else if(strcmp(argv[1], "-cd") == 0)
+	{
+		char srcFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/text.txt";
+		hamCo(srcFlName, (int)*argv[2] - '0');
+		char srcCodedFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/ham_ham.txt";
+		hamDe(srcCodedFlName, (int)*argv[2] - '0');
+		printf("== co and de coded with %d ==\n", (int)*argv[2] - '0');
+	}
 	return 0;
 }
 
@@ -47,7 +66,7 @@ int binToDec(int *bin, int size)
 	return out;
 }
 
-void hamCo(char *srcFlName)
+void hamCo(char *srcFlName, int bit)
 {
 	int binDeg[7];
 	binDeg[0] = 1;
@@ -57,24 +76,19 @@ void hamCo(char *srcFlName)
 	binDeg[4] = 16;
 	binDeg[5] = 32;
 	binDeg[6] = 64;
-
-	int block_size = 0;
-	while(1)
-	{
-		printf("size of bit block (64 max) : ");
-		scanf("%d", &block_size);
-		if (block_size < 65 && block_size > 0)
-			break;
-		printf("wrong number\n");
-	}
 	int i = 0;
+	int block_size = bit;
+	if (block_size > 64 || block_size < 0)
+	{
+		perror("wrong number of bits\n");
+		exit(1);
+	}
 	while (block_size > binDeg[i])
 		i++;
 	int numb_of_degree = i + 1;
 	block_size += numb_of_degree;
 	
 	int c;
-	int flag = 0;
 	char buffer[8];
 	int *out_buffer = (int *)malloc(block_size * sizeof(int));
 	
@@ -136,14 +150,13 @@ void hamCo(char *srcFlName)
 		for(int j = 0; j < i; j++)
 			fprintf(ham, "%d", out_buffer[j]);
 	}
-
 	free(out_buffer);
 	fclose(binFl);
 	fclose(ham);
 	return;
 }
 
-void hamDe(char *srcFlName)
+void hamDe(char *srcFlName, int bit)
 {
 	int binDeg[7];
 	binDeg[0] = 1;
@@ -154,15 +167,11 @@ void hamDe(char *srcFlName)
 	binDeg[5] = 32;
 	binDeg[6] = 64;
 	int i;
-
-	int block_size = 0;
-	while(1)
+	int block_size = bit;
+	if (block_size > 64 || block_size < 0)
 	{
-		printf("size of bit block (64 max) : ");
-		scanf("%d", &block_size);
-		if (block_size < 65 && block_size > 0)
-			break;
-		printf("wrong number\n");
+		perror("wrong number of bits\n");
+		exit(1);
 	}
 	i = 0;
 	while (block_size > binDeg[i])
@@ -195,7 +204,6 @@ void hamDe(char *srcFlName)
 				char_buff[i] = chr - '0';
 			i++;
 		}
-		
 		//if not divided by 8 (13 numb for ex)
 		if(i != block_size)
 		{
@@ -229,8 +237,8 @@ void hamDe(char *srcFlName)
 		{
 			if(deg_buff[j] != char_buff[binDeg[j] - 1])
 				bit_sum += binDeg[j];
-			char_buff[bit_sum] = (char_buff[bit_sum] + 1) % 2;
 		}
+		char_buff[bit_sum] = (char_buff[bit_sum] + 1) % 2;
 		//preparing for output
 		i = 0;
 		for(int j = 0; j < numb_of_degree; j++)
@@ -251,9 +259,7 @@ void hamDe(char *srcFlName)
 				fputc(c, deham_out);
 			}
 		}
-		
 	}
-	printf("1");
 	fclose(src);
 	fclose(deham_out);
 	free(char_buff);
