@@ -7,33 +7,48 @@ using namespace std;
 bool isInArr(int numb, int *arr, int arr_sz);
 void decToBin(int dec, int *bin, int size);
 int binToDec(int *bin, int size);
+int charsToNumb(char *bin, int size);
 void hamCo(char *srcFlName, int bit);
 void hamDe(char *srcFlName, int bit);
 
 int main(int argc, char *argv[])
 {	
+	char srcFlName[] = "text.txt";
+	char srcCodedFlName[] = "ham_ham.txt";
+	
 	if(argc < 3)
 		printf("Argument expected\n");
-	else if(strcmp(argv[1], "-c") == 0)
-	{	
-		char srcFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/text.txt";
-		hamCo(srcFlName, (int)*argv[2] - '0');
-		printf("== coded  with %d ==\n", (int)*argv[2] - '0');
-	}
-	else if(strcmp(argv[1], "-d") == 0)
+	else if(argc == 3)
 	{
-		char srcCodedFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/ham_ham.txt";
-		hamDe(srcCodedFlName, (int)*argv[2] - '0');
-		printf("== decoded  with %d ==\n", (int)*argv[2] - '0');		
+		int bits;
+		if(argv[2][1] != '\0' && argv[2][2] != '\0' && argv[2][3] != '\0')
+			perror("too big bits arg\n");
+		else if(argv[2][1] != '\0' && argv[2][2] == '\0')
+			bits = charsToNumb(argv[2], 2);
+		else
+			bits = charsToNumb(argv[2], 1);
+
+		if(strcmp(argv[1], "-c") == 0)
+		{	
+			hamCo(srcFlName, bits);
+			printf("== coded  with %d ==\n", bits);
+		}
+		else if(strcmp(argv[1], "-d") == 0)
+		{
+			hamDe(srcCodedFlName, bits);
+			printf("== decoded  with %d ==\n", bits);		
+		}
+		else if(strcmp(argv[1], "-cd") == 0)
+		{
+			hamCo(srcFlName, bits);
+			hamDe(srcCodedFlName, bits);
+			printf("== co and de coded with %d ==\n", bits);
+		}
+		else
+			perror("wrong args\n");
 	}
-	else if(strcmp(argv[1], "-cd") == 0)
-	{
-		char srcFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/text.txt";
-		hamCo(srcFlName, (int)*argv[2] - '0');
-		char srcCodedFlName[] = "/Users/mac/Desktop/univer/proggin/oib/lab 10/ham_ham.txt";
-		hamDe(srcCodedFlName, (int)*argv[2] - '0');
-		printf("== co and de coded with %d ==\n", (int)*argv[2] - '0');
-	}
+	else
+		perror("too many args\n");
 	return 0;
 }
 
@@ -62,6 +77,18 @@ int binToDec(int *bin, int size)
 	{
 		out += bin[i] * temp;
 		temp <<= 1;
+	}
+	return out;
+}
+
+int charsToNumb(char *bin, int size)
+{
+	int out = 0;
+	int i = 0;
+	while(i < size)
+	{
+		out = out * 10 + bin[i] - '0';
+		i++;
 	}
 	return out;
 }
